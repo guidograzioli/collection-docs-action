@@ -49,6 +49,7 @@ runs:
           sudo apt install -y sed hub
         else
           echo "Skipping doc generation"
+        fi
 
     - name: Create doc directories and resources
       shell: bash
@@ -64,6 +65,7 @@ runs:
           done
         else
           echo "Skipping doc generation"
+        fi
 
     - name: Scan PR merges from latest tag
       shell: bash
@@ -119,6 +121,7 @@ runs:
           git push origin
         else
           echo "Skipping commit changelogs"
+        fi
 
     - name: Run sphinx
       shell: bash
@@ -128,6 +131,7 @@ runs:
           sphinx-build -M html . _build -v
         else
           echo "Skipping sphinx execution"
+        fi
 
     - name: Commit docs
       shell: bash
@@ -149,3 +153,4 @@ runs:
           git push origin gh-pages
         else
           echo "Skipping commit to gh-pages"
+        fi
