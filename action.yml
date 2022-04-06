@@ -48,7 +48,7 @@ runs:
           pip install -r requirements.txt
           sudo apt install -y sed hub
         else
-          echo "Skipping doc generation"
+          echo "Skipping dependencies install"
         fi
 
     - name: Create doc directories and resources
