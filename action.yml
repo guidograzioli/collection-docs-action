@@ -97,8 +97,8 @@ runs:
               echo "Generating changelog for release"
               antsibull-changelog release -v
             else
-              echo "Generating changelog for development version $(git describe --tags)"
-              antsibull-changelog release --version "$(git describe --tags)" -v
+              echo "Generating changelog for development version $(grep version galaxy.yml | awk -F'"' '{ print $2 }')-devel"
+              antsibull-changelog release --version "$(grep version galaxy.yml | awk -F'"' '{ print $2 }')-devel" -v
             fi
           fi
         fi
