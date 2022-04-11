@@ -86,6 +86,7 @@ runs:
             type="$(echo $frag | cut -d~ -f3)"
             msg="$(echo $frag | cut -d~ -f4 | sed 's/`/``/g')"
             if [[ "$type" != "" && "${TYPES[*]}" =~ "${type}" ]]; then
+              echo "Generating fragment for PR #${PR}"
               echo -e "$type:\n  - >\n    $msg \`#${PR} <https://github.com/${{ inputs.collection_repo }}/pull/${PR}>\`_" \
                 > changelogs/fragments/${PR}.yaml
             fi
@@ -93,8 +94,10 @@ runs:
           antsibull-changelog lint -vvv
           if [[ "${{github.ref}}" == "refs/heads/main" ]]; then
             if [[ "${{ inputs.changelog_release }}" == "true" ]]; then
+              echo "Generating changelog for release"
               antsibull-changelog release -v
             else
+              echo "Generating changelog for development version $(git describe --tags)"
               antsibull-changelog release --version "$(git describe --tags)" -v
             fi
           fi
