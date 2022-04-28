@@ -97,8 +97,9 @@ runs:
               echo "Generating changelog for release"
               antsibull-changelog release -v
             else
-              echo "Generating changelog for development version $(grep version galaxy.yml | awk -F'"' '{ print $2 }')-devel"
-              antsibull-changelog release --version "$(grep version galaxy.yml | awk -F'"' '{ print $2 }')-devel" -v
+              DEV_VERSION=$(grep -Po 'version: ?"?[0-9]+[.][0-9]+[.][0-9]+"?' galaxy.yml | awk -F'"' '{ print $2 }')-devel
+              echo "Generating changelog for development version ${DEV_VERSION}"
+              antsibull-changelog release --version "${DEV_VERSION}" -v
             fi
           fi
         fi
