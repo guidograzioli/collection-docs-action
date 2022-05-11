@@ -127,6 +127,8 @@ runs:
           if [[ ${{ steps.scan_prs.outputs.PRS }} > 0 ]]; then
             echo "Generating text for github release page"
             git diff --minimal --output-indicator-new=' ' -U0 --no-indent-heuristic CHANGELOG.rst | grep "^ " | sed -e 's/`\(#[0-9]\+\) <.*_/\1/g' > gh-release.md
+          else
+            echo "v${{ steps.changelog_version.outputs.TAG_VERSION }}" > gh-release.md
           fi
           echo "Sending changes"
           git add CHANGELOG.rst changelogs/changelog.yaml
