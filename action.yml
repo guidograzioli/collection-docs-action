@@ -124,7 +124,7 @@ runs:
         if [[ "${{ inputs.commit_changelog }}" == "true" ]]; then
           git config user.name github-actions
           git config user.email github-actions@github.com
-          if [[ ${{ steps.scan_prs.outputs.PRS }}" > 0 ]]; then
+          if [[ ${{ steps.scan_prs.outputs.PRS }} > 0 ]]; then
             echo "Generating text for github release page"
             git diff --minimal --output-indicator-new=' ' -U0 --no-indent-heuristic CHANGELOG.rst | grep "^ " | sed -e 's/`\(#[0-9]\+\) <.*_/\1/g' > gh-release.md
           fi
