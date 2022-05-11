@@ -59,6 +59,7 @@ runs:
           mkdir -p ./docs/plugins ./docs/roles
           cat ./docs/roles.rst.template > ./docs/roles/index.rst
           antsibull-docs collection --use-current --squash-hierarchy --dest-dir docs/plugins  ${{ inputs.collection_fqcn }}
+          echo "Generate role index"
           for role_readme in roles/*/README.md; do
             ln -f -s ../../$role_readme ./docs/roles/$(basename $(dirname $role_readme)).md
             echo "    $(basename $(dirname $role_readme))" >> ./docs/roles/index.rst
@@ -70,6 +71,7 @@ runs:
     - name: Scan PR merges from latest tag
       shell: bash
       working-directory: ${{ inputs.path }}
+      id: scan_prs
       run: |
         TYPES=("minor_changes" "major_changes" "bugfixes" "deprecated_features" "removed_features" "breaking_changes")
         TAG=$(git describe --abbrev=0 --tags)
@@ -79,6 +81,7 @@ runs:
           PREV_TAG=$(git tag | grep -P "^[0-9]+[.][0-9]+[.][0-9]+$" | sort --version-sort -r | head -n2 | grep -v "${TAG}")
           PRS=($(comm -12 <(git log --oneline ${PREV_TAG}..${TAG} --format="tformat:%H" | sort ) <(hub pr list -s all -f '%sm%n' --color=never | sort )))
         fi
+        echo "::set-output name=PRS::${#PRS[@]}"
         if [[ ${#PRS[@]} > 0 ]]; then
           IFS=$'\n' FRAGMENTS=($(hub pr list -s all -f '%sm~%I~%L~%t~%n' --color=never | grep -P "$(echo "^(${PRS[@]})" | tr ' ' '|')"))
           for frag in "${FRAGMENTS[@]}"; do
@@ -91,16 +94,18 @@ runs:
                 > changelogs/fragments/${PR}.yaml
             fi
           done
-          antsibull-changelog lint -vvv
-          if [[ "${{github.ref}}" == "refs/heads/main" ]]; then
-            if [[ "${{ inputs.changelog_release }}" == "true" ]]; then
-              echo "Generating changelog for release"
-              antsibull-changelog release -v
-            else
-              DEV_VERSION=$(grep -Po 'version: ?"?[0-9]+[.][0-9]+[.][0-9]+"?' galaxy.yml | awk -F'"' '{ print $2 }')-devel
-              echo "Generating changelog for development version ${DEV_VERSION}"
-              antsibull-changelog release --version "${DEV_VERSION}" -v
-            fi
+        else
+          echo "WARN: no PRs were found to include in changelogs"
+        fi
+        antsibull-changelog lint -vvv
+        if [[ "${{github.ref}}" == "refs/heads/main" ]]; then
+          if [[ "${{ inputs.changelog_release }}" == "true" ]]; then
+            echo "Generating changelog for release"
+            antsibull-changelog release -v
+          else
+            DEV_VERSION=$(grep -Po 'version: ?"?[0-9]+[.][0-9]+[.][0-9]+"?' galaxy.yml | awk -F'"' '{ print $2 }')-devel
+            echo "Generating changelog for development version ${DEV_VERSION}"
+            antsibull-changelog release --version "${DEV_VERSION}" -v
           fi
         fi
       env:
@@ -119,7 +124,11 @@ runs:
         if [[ "${{ inputs.commit_changelog }}" == "true" ]]; then
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git diff --minimal --output-indicator-new=' ' -U0 --no-indent-heuristic CHANGELOG.rst | grep "^ "| sed -e 's/`\(#[0-9]\+\) <.*_/\1/g' > gh-release.md
+          if [[ ${{ steps.scan_prs.outputs.PRS }}" > 0 ]]; then
+            echo "Generating text for github release page"
+            git diff --minimal --output-indicator-new=' ' -U0 --no-indent-heuristic CHANGELOG.rst | grep "^ " | sed -e 's/`\(#[0-9]\+\) <.*_/\1/g' > gh-release.md
+          fi
+          echo "Sending changes"
           git add CHANGELOG.rst changelogs/changelog.yaml
           git commit -m "Update changelog for release ${{ steps.changelog_version.outputs.TAG_VERSION }}" || true
           git push origin
@@ -146,6 +155,7 @@ runs:
           git config user.email github-actions@github.com
           git stash
           git checkout gh-pages
+          git pull
           rm -rf $(basename ${GITHUB_REF})
           mv docs/_build/html $(basename ${GITHUB_REF})
           ln --force --no-dereference --symbolic   main latest
