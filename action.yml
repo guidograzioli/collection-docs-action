@@ -56,7 +56,9 @@ runs:
       working-directory: ${{ inputs.path }}
       run: |
         if [[ "${{ inputs.generate_docs }}" == "true" ]]; then
+          rm -rf ./docs/plugins ./docs/roles
           mkdir -p ./docs/plugins ./docs/roles
+          chmod 750 ./docs/plugins ./docs/roles
           cat ./docs/roles.rst.template > ./docs/roles/index.rst
           antsibull-docs collection --use-current --squash-hierarchy --dest-dir docs/plugins  ${{ inputs.collection_fqcn }}
           echo "Generate role index"
