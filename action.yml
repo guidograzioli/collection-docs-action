@@ -56,11 +56,13 @@ runs:
       working-directory: ${{ inputs.path }}
       run: |
         if [[ "${{ inputs.generate_docs }}" == "true" ]]; then
+          echo "Create doc directories and resources"
           rm -rf ./docs/plugins ./docs/roles
           mkdir -p ./docs/plugins ./docs/roles
           chmod 750 ./docs/plugins ./docs/roles
           cat ./docs/roles.rst.template > ./docs/roles/index.rst
           antsibull-docs collection --use-current --squash-hierarchy --dest-dir docs/plugins  ${{ inputs.collection_fqcn }}
+          ls -l docs/plugins/
           echo "Generate role index"
           for role_readme in roles/*/README.md; do
             ln -f -s ../../$role_readme ./docs/roles/$(basename $(dirname $role_readme)).md
@@ -75,6 +77,7 @@ runs:
       working-directory: ${{ inputs.path }}
       id: scan_prs
       run: |
+        echo "Scan PR merges from latest tag and generate changelog"
         TYPES=("minor_changes" "major_changes" "bugfixes" "deprecated_features" "removed_features" "breaking_changes")
         TAG=$(git describe --abbrev=0 --tags)
         if [[ "${{github.ref}}" == "refs/heads/main" ]]; then
@@ -145,7 +148,7 @@ runs:
       working-directory: ${{ inputs.path }}/docs/
       run: |
         if [[ "${{ inputs.generate_docs }}" == "true" ]]; then
-          sphinx-build -M html . _build -v
+          sphinx-build -M html . _build -vv
         else
           echo "Skipping sphinx execution"
         fi
