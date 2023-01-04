@@ -75,7 +75,7 @@ runs:
               echo "   $plugin_name" >> ./docs/plugins/index.rst
               antsibull-docs plugin --dest-dir docs/plugins --plugin-type ${plugin_type} ${{ inputs.collection_fqcn }}.${plugin_name}
               mv docs/plugins/${{ inputs.collection_fqcn }}.${plugin_name}_${plugin_type}.rst docs/plugins/${plugin_name}.rst
-              sed -e "s#${{ inputs.collection_fqcn }}.${plugin_name} ${plugin_type}#${plugin_name}#" docs/plugins/${plugin_name}.rst
+              sed -i -e "s#${{ inputs.collection_fqcn }}.${plugin_name} ${plugin_type}#${plugin_name}#" docs/plugins/${plugin_name}.rst
             done
             echo "" >> ./docs/plugins/index.rst
           done
