@@ -68,9 +68,10 @@ runs:
             plugin_type=$(basename $plugin_dir)
             echo ".. toctree::" >> ./docs/plugins/index.rst
             echo "   :caption: $plugin_type plugins" >> ./docs/plugins/index.rst
+            echo "" >> ./docs/plugins/index.rst
             for plugin_file in plugins/${plugin_type}/*.py; do
               plugin_name=$(basename -s.py $plugin_file)
-              echo "    $plugin_name" >> ./docs/plugins/index.rst
+              echo "   $plugin_name" >> ./docs/plugins/index.rst
               antsibull-docs plugin --dest-dir docs/plugins --plugin-type ${plugin_type} ${{ inputs.collection_fqcn }}.${plugin_name}
               mv docs/plugins/${{ inputs.collection_fqcn }}.${plugin_name}_$plugin_type.rst docs/plugins/${plugin_name}.rst
             done
