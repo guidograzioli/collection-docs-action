@@ -61,7 +61,20 @@ runs:
           mkdir -p ./docs/plugins ./docs/roles
           chmod 750 ./docs/plugins ./docs/roles
           cat ./docs/roles.rst.template > ./docs/roles/index.rst
-          antsibull-docs collection --use-current --squash-hierarchy --dest-dir docs/plugins  ${{ inputs.collection_fqcn }}
+          echo "Plugin Index" > ./docs/plugins/index.rst
+          echo "============" >> ./docs/plugins/index.rst
+          echo "" >> ./docs/plugins/index.rst
+          for plugin_dir in plugins/*; do
+            plugin_type = $(basename $plugin_dir)
+            echo ".. toctree::" >> ./docs/plugins/index.rst
+            echo "   :caption: $plugin_type plugins" >> ./docs/plugins/index.rst
+            for plugin_file in plugins/${plugin_type}/*.py; do
+              plugin_name = $(basename $(dirname $plugin_file))
+              echo "    $plugin_name" >> ./docs/plugins/index.rst
+              antsibull-docs plugin --dest-dir docs/plugins --plugin-type ${plugin_type} ${{ inputs.collection_fqcn }}.${plugin_name}
+            done
+            echo "" >> ./docs/plugins/index.rst
+          done
           ls -l docs/plugins/
           echo "Generate role index"
           for role_readme in roles/*/README.md; do
