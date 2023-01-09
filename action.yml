@@ -61,25 +61,27 @@ runs:
           mkdir -p ./docs/plugins ./docs/roles
           chmod 750 ./docs/plugins ./docs/roles
           cat ./docs/roles.rst.template > ./docs/roles/index.rst
-          echo "Plugin Index" > ./docs/plugins/index.rst
-          echo "============" >> ./docs/plugins/index.rst
-          echo "" >> ./docs/plugins/index.rst
-          for plugin_dir in plugins/*; do
-            plugin_type=$(basename $plugin_dir)
-            echo ".. toctree::" >> ./docs/plugins/index.rst
-            echo "   :caption: $plugin_type plugins" >> ./docs/plugins/index.rst
-            echo "   :maxdepth: 0" >> ./docs/plugins/index.rst
+          if [ -d ./plugins/ ]; then
+            echo "Plugin Index" > ./docs/plugins/index.rst
+            echo "============" >> ./docs/plugins/index.rst
             echo "" >> ./docs/plugins/index.rst
-            for plugin_file in plugins/${plugin_type}/*.py; do
-              plugin_name=$(basename -s.py $plugin_file)
-              echo "   $plugin_name" >> ./docs/plugins/index.rst
-              antsibull-docs plugin --dest-dir docs/plugins --plugin-type ${plugin_type} ${{ inputs.collection_fqcn }}.${plugin_name}
-              mv docs/plugins/${{ inputs.collection_fqcn }}.${plugin_name}_${plugin_type}.rst docs/plugins/${plugin_name}.rst
-              sed -i -e "s#${{ inputs.collection_fqcn }}.${plugin_name} ${plugin_type}#${plugin_name}#" docs/plugins/${plugin_name}.rst
+            for plugin_dir in plugins/*; do
+              plugin_type=$(basename $plugin_dir)
+              echo ".. toctree::" >> ./docs/plugins/index.rst
+              echo "   :caption: $plugin_type plugins" >> ./docs/plugins/index.rst
+              echo "   :maxdepth: 0" >> ./docs/plugins/index.rst
+              echo "" >> ./docs/plugins/index.rst
+              for plugin_file in plugins/${plugin_type}/*.py; do
+                plugin_name=$(basename -s.py $plugin_file)
+                echo "   $plugin_name" >> ./docs/plugins/index.rst
+                antsibull-docs plugin --dest-dir docs/plugins --plugin-type ${plugin_type} ${{ inputs.collection_fqcn }}.${plugin_name}
+                mv docs/plugins/${{ inputs.collection_fqcn }}.${plugin_name}_${plugin_type}.rst docs/plugins/${plugin_name}.rst
+                sed -i -e "s#${{ inputs.collection_fqcn }}.${plugin_name} ${plugin_type}#${plugin_name}#" docs/plugins/${plugin_name}.rst
+              done
+              echo "" >> ./docs/plugins/index.rst
             done
-            echo "" >> ./docs/plugins/index.rst
-          done
-          ls -l docs/plugins/
+            ls -l docs/plugins/
+          fi
           echo "Generate role index"
           for role_readme in roles/*/README.md; do
             ln -f -s ../../$role_readme ./docs/roles/$(basename $(dirname $role_readme)).md
