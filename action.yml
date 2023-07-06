@@ -57,6 +57,7 @@ runs:
       run: |
         if [[ "${{ inputs.generate_docs }}" == "true" ]]; then
           echo "Create doc directories and resources"
+          echo "`pwd`"
           rm -rf ./docs/plugins ./docs/roles
           mkdir -p ./docs/plugins ./docs/roles
           chmod 750 ./docs/plugins ./docs/roles
@@ -65,7 +66,7 @@ runs:
             echo "Plugin Index" > ./docs/plugins/index.rst
             echo "============" >> ./docs/plugins/index.rst
             echo "" >> ./docs/plugins/index.rst
-            TYPES=("action" "filter" "lookup" "modules")
+            TYPES=("action" "filter" "lookup" "modules" "inventory")
             for plugin_dir in plugins/*; do
               plugin_type=$(basename $plugin_dir)
               if [[ " ${TYPES[*]} " =~ " ${plugin_type} " ]]; then
@@ -76,6 +77,7 @@ runs:
                 for plugin_file in plugins/${plugin_type}/*.py; do
                   plugin_name=$(basename -s.py $plugin_file)
                   echo "   $plugin_name" >> ./docs/plugins/index.rst
+                  echo "Creating doc for $plugin_name ($plugin_file) of type ${plugin_type%s}"
                   antsibull-docs plugin --dest-dir docs/plugins --plugin-type ${plugin_type%s} ${{ inputs.collection_fqcn }}.${plugin_name}
                   mv docs/plugins/${{ inputs.collection_fqcn }}.${plugin_name}_${plugin_type%s}.rst docs/plugins/${plugin_name}.rst
                   sed -i -e "s#${{ inputs.collection_fqcn }}.${plugin_name} ${plugin_type%s}#${plugin_name}#" docs/plugins/${plugin_name}.rst
