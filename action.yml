@@ -87,7 +87,7 @@ runs:
                   plugin_name=$(basename -s.py $plugin_file)
                   echo "   $plugin_name" >> ./docs/plugins/index.rst
                   echo "Creating doc for $plugin_name ($plugin_file) of type ${plugin_type%s}"
-                  antsibull-docs plugin --dest-dir docs/plugins --plugin-type ${plugin_type%s} ${{ inputs.collection_fqcn }}.${plugin_name}
+                  antsibull-docs plugin --use-html-blobs --dest-dir docs/plugins --plugin-type ${plugin_type%s} ${{ inputs.collection_fqcn }}.${plugin_name}
                   mv docs/plugins/${{ inputs.collection_fqcn }}.${plugin_name}_${plugin_type%s}.rst docs/plugins/${plugin_name}.rst
                   sed -i -e "s#${{ inputs.collection_fqcn }}.${plugin_name} ${plugin_type%s}#${plugin_name}#" docs/plugins/${plugin_name}.rst
                 done
