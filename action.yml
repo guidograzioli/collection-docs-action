@@ -75,7 +75,7 @@ runs:
             echo "Plugin Index" > ./docs/plugins/index.rst
             echo "============" >> ./docs/plugins/index.rst
             echo "" >> ./docs/plugins/index.rst
-            TYPES=("action" "filter" "lookup" "modules" "inventory")
+            TYPES=( "filter" "lookup" "modules" "inventory" )
             for plugin_dir in plugins/*; do
               plugin_type=$(basename $plugin_dir)
               if [[ " ${TYPES[*]} " =~ " ${plugin_type} " ]]; then
