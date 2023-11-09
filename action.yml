@@ -141,7 +141,7 @@ runs:
             echo "Generating changelog for release"
             antsibull-changelog release -v
           else
-            DEV_VERSION=$(grep -Po 'version: ?"?[0-9]+[.][0-9]+[.][0-9]+"?' galaxy.yml | awk -F'"' '{ print $2 }')-devel
+            DEV_VERSION=$(grep -Po '(?<=version:) ?"?[0-9]+[.][0-9]+[.][0-9]+"?' galaxy.yml | grep -Po "[0-9]+[.][0-9]+[.][0-9]+")-devel
             echo "Generating changelog for development version ${DEV_VERSION}"
             antsibull-changelog release --version "${DEV_VERSION}" -v
           fi
