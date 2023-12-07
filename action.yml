@@ -11,23 +11,23 @@ inputs:
   dependencies:
     description: 'Whether to install dependencies'
     required: false
-    default: true
+    default: 'true'
   commit_changelog:
     description: 'Whether to commit the changelog'
     required: false
-    default: false
+    default: 'false'
   commit_ghpages:
     description: 'Whether to commit docs to gh-pages'
     required: false
-    default: true
+    default: 'true'
   changelog_release:
     description: 'Whether to generate release changelogs'
     required: false
-    default: false
+    default: 'false'
   generate_docs:
     description: 'Whether to run docs generation with sphinx'
     required: false
-    default: true
+    default: 'true'
   path:
     description: 'Working directory for running scripts'
     required: false
@@ -135,7 +135,7 @@ runs:
         else
           echo "WARN: no PRs were found to include in changelogs"
           DEV_VERSION=$(grep -Po '(?<=version:) ?"?[0-9]+[.][0-9]+[.][0-9]+"?' galaxy.yml | grep -Po "[0-9]+[.][0-9]+[.][0-9]+")-devel
-          echo -e "release_summary: Internal release: documentation or test changes only" \
+          echo -e "release_summary: Internal release, documentation or test changes only." \
                 > changelogs/fragments/v${DEV_VERSION}_summary.yaml
         fi
         antsibull-changelog lint -vvv
