@@ -134,6 +134,8 @@ runs:
           done
         else
           echo "WARN: no PRs were found to include in changelogs"
+           echo -e "release_summary: Internal release: documentation or test changes only" \
+                > changelogs/fragments/v${DEV_VERSION}_summary.yaml
         fi
         antsibull-changelog lint -vvv
         if [[ "${{github.ref}}" == "refs/heads/main" ]]; then
