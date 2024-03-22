@@ -132,7 +132,7 @@ runs:
           for frag in "${FRAGMENTS[@]}"; do
             PR=$(echo $frag | cut -d~ -f2)
             types="$(echo $frag | cut -d~ -f3)"
-            type_list=($(echo $type | sed "s/, /\n/g" ))
+            type_list=($(echo $types | sed "s/, /\n/g" ))
             msg="$(echo $frag | cut -d~ -f4 | sed 's/`/``/g')"
             for type in "${type_list[@]}"; do
               if [[ "$type" != "" && "${TYPES[*]}" =~ "${type}" ]]; then
