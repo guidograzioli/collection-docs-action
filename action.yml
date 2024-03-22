@@ -55,7 +55,14 @@ runs:
           python -m pip install --upgrade pip
           pip install -r docs/requirements.txt
           pip install -r requirements.txt
-          sudo apt install -y sed hub
+          sudo mkdir -p -m 755 /etc/apt/keyrings \
+            && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg |\
+              sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+            && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+            && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |\
+              sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+            && sudo apt update \
+            && sudo apt install -y gh sed hub
         else
           echo "Skipping dependencies install"
         fi
@@ -124,13 +131,17 @@ runs:
           IFS=$'\n' FRAGMENTS=($(hub pr list -s all -f '%sm~%I~%L~%t~%n' --color=never | grep -P "$(echo "^(${PRS[@]})" | tr ' ' '|')"))
           for frag in "${FRAGMENTS[@]}"; do
             PR=$(echo $frag | cut -d~ -f2)
-            type="$(echo $frag | cut -d~ -f3)"
+            types="$(echo $frag | cut -d~ -f3)"
+            type_list=($(echo $type | sed "s/, /\n/g" ))
             msg="$(echo $frag | cut -d~ -f4 | sed 's/`/``/g')"
-            if [[ "$type" != "" && "${TYPES[*]}" =~ "${type}" ]]; then
-              echo "Generating fragment for PR #${PR}"
-              echo -e "$type:\n  - >\n    $msg \`#${PR} <https://github.com/${{ inputs.collection_repo }}/pull/${PR}>\`_" \
-                > changelogs/fragments/${PR}.yaml
-            fi
+            for type in "${type_list[@]}"; do
+              if [[ "$type" != "" && "${TYPES[*]}" =~ "${type}" ]]; then
+                echo "Generating fragment for PR #${PR}"
+                echo -e "$type:\n  - >\n    $msg \`#${PR} <https://github.com/${{ inputs.collection_repo }}/pull/${PR}>\`_" \
+                  > changelogs/fragments/${PR}.yaml
+                break
+              fi
+            done
           done
         else
           echo "WARN: no PRs were found to include in changelogs"
