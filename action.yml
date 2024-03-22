@@ -124,7 +124,8 @@ runs:
           IFS=$'\n' FRAGMENTS=($(hub pr list -s all -f '%sm~%I~%L~%t~%n' --color=never | grep -P "$(echo "^(${PRS[@]})" | tr ' ' '|')"))
           for frag in "${FRAGMENTS[@]}"; do
             PR=$(echo $frag | cut -d~ -f2)
-            type="$(echo $frag | cut -d~ -f3)"
+            types="$(echo $frag | cut -d~ -f3)"
+            type_list=($(echo $types | sed "s/, /\n/g" ))
             msg="$(echo $frag | cut -d~ -f4 | sed 's/`/``/g')"
             if [[ "$type" != "" && "${TYPES[*]}" =~ "${type}" ]]; then
               echo "Generating fragment for PR #${PR}"
