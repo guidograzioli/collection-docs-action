@@ -43,6 +43,9 @@ inputs:
     description: 'Account for git commits'
     required: false
     default: 'github-actions'
+  release_summary:
+    description: 'Optional release summary for changelogs'
+    required: false
 
 runs:
   using: "composite"
@@ -143,6 +146,10 @@ runs:
               fi
             done
           done
+          if [ "x${{ inputs.release_summary }}" != "x" ]; then
+            DEV_VERSION=$(grep -Po '(?<=version:) ?"?[0-9]+[.][0-9]+[.][0-9]+"?' galaxy.yml | grep -Po "[0-9]+[.][0-9]+[.][0-9]+")-devel
+            echo -e "release_summary: ${{ inputs.release_summary }}" > changelogs/fragments/v${DEV_VERSION}_summary.yaml
+          fi
         else
           echo "WARN: no PRs were found to include in changelogs"
           DEV_VERSION=$(grep -Po '(?<=version:) ?"?[0-9]+[.][0-9]+[.][0-9]+"?' galaxy.yml | grep -Po "[0-9]+[.][0-9]+[.][0-9]+")-devel
@@ -180,7 +187,7 @@ runs:
             echo "Generating text for github release page"
             git diff --minimal --output-indicator-new=' ' -U0 --no-indent-heuristic CHANGELOG.rst | grep "^ " | sed -e 's/`\(#[0-9]\+\) <.*_/\1/g' > gh-release.md
           else
-            echo "v${{ steps.changelog_version.outputs.TAG_VERSION }}" > gh-release.md
+            echo "Internal release, documentation or test changes only" > gh-release.md
           fi
           echo "Sending changes"
           git add CHANGELOG.rst changelogs/changelog.yaml
