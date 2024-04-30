@@ -46,6 +46,9 @@ inputs:
   release_summary:
     description: 'Optional release summary for changelogs'
     required: false
+  historical_docs:
+    description: 'Keep directories with historical tagged releases'
+    default: 'true'
 
 runs:
   using: "composite"
@@ -223,6 +226,9 @@ runs:
           git show origin/main:docs/_gh_include/header.inc > index.html
           (echo main; echo latest; dirname *.*.*/index.html | sort --version-sort --reverse) | xargs -I@@ -n1 echo '<li class="toctree-l1"><a class="reference internal" href="@@/">@@</a></li>' >> index.html
           git show origin/main:docs/_gh_include/footer.inc >> index.html
+          if [[ "${{ inputs.historical_docs }}" == "false" ]]; then
+            echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=./main/" /></head></html>' > index.html
+          fi
           git add $(basename ${GITHUB_REF}) latest index.html
           git commit -s -m "Update docs for $(basename ${GITHUB_REF})" || true
           git push origin gh-pages
